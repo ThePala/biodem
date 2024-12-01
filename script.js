@@ -6,13 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const organismGrid = document.getElementById("organismGrid");
     const searchBar = document.getElementById("searchBar");
     const loadMoreButton = document.getElementById("loadMore");
+    const loadAllButton = document.getElementById("loadAllButton");
 
     // Load JSON data
     fetch('enriched_species.json')
         .then(response => response.json())
         .then(data => {
             organisms = data;
-            displayBatch();
+            displayBatch(); // Display first batch
         })
         .catch(error => console.error('Error fetching observations:', error));
 
@@ -55,5 +56,27 @@ document.addEventListener("DOMContentLoaded", () => {
         displayBatch();
     });
 
+    // Handle "Load More" button
     loadMoreButton.addEventListener("click", displayBatch);
+
+    // Handle "Load All" button
+    loadAllButton.addEventListener("click", () => {
+        organismGrid.innerHTML = '';
+        displayedCount = organisms.length; // Set to all organisms
+        organisms.forEach(organism => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${organism.image_url}" alt="${organism.common_name}">
+                <div class="card-content">
+                    <h3>${organism.common_name}</h3>
+                    <p><em>${organism.scientific_name}</em></p>
+                    <p>${organism.family} - ${organism.genus}</p>
+                    <a href="${organism.url}" target="_blank">More Info</a>
+                </div>
+            `;
+            organismGrid.appendChild(card);
+        });
+        loadMoreButton.style.display = "none"; // Hide "Load More" button since all items are displayed
+    });
 });
