@@ -1,0 +1,17 @@
+[
+    {
+      "name": "Indian Peafowl",
+      "scientific_name": "Pavo cristatus",
+      "category": "Bird",
+      "description": "The national bird of India, known for its vibrant feathers.",
+      "image": "images/indian_peafowl.jpg"
+    },
+    {
+      "name": "Neem Tree",
+      "scientific_name": "Azadirachta indica",
+      "category": "Plant",
+      "description": "A fast-growing tree with medicinal properties.",
+      "image": "images/neem_tree.jpg"
+    }
+  ]
+  
