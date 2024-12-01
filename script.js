@@ -1,47 +1,64 @@
-// API URL for fetching observations
-const apiUrl = 'https://api.inaturalist.org/v1/observations?project_id=green-audit-christ-deemed-to-be-university-bangalore';
-
-// Fetch observations from the API
-fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-        const observations = data.results;
-
-        // Filter species-level observations
-        const speciesObservations = observations.filter(obs => obs.taxon && obs.taxon.rank === "species");
-
-        // Get the container to display observations
-        const container = document.getElementById('observations-container');
-        container.innerHTML = ''; // Clear loading text
-
-        if (speciesObservations.length === 0) {
-            container.innerHTML = '<p>No species-level observations found.</p>';
-            return;
+document.addEventListener("DOMContentLoaded", function () {
+    const speciesContainer = document.getElementById("speciesContainer");
+    const searchInput = document.getElementById("searchInput");
+  
+    if (!speciesContainer) {
+      console.error("speciesContainer element not found.");
+      return;
+    }
+  
+    fetch("enriched_species.json")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
-        // Add each observation to the container
-        speciesObservations.forEach(obs => {
-            const speciesName = obs.taxon.preferred_common_name || obs.taxon.name || "Unknown Species";
-            const scientificName = obs.taxon.name || "No scientific name available";
-            const observedBy = obs.user.login || "Anonymous";
-            const photoUrl = obs.taxon.default_photo ? obs.taxon.default_photo.medium_url : '';
-
-            const observationDiv = document.createElement('div');
-            observationDiv.classList.add('observation');
-
-            observationDiv.innerHTML = `
-                <img src="${photoUrl}" alt="${speciesName}" />
-                <div>
-                    <h3>${speciesName}</h3>
-                    <p><strong>Scientific Name:</strong> ${scientificName}</p>
-                    <p><strong>Observed By:</strong> ${observedBy}</p>
-                </div>
-            `;
-
-            container.appendChild(observationDiv);
+        return response.json();
+      })
+      .then(data => {
+        renderSpecies(data);
+  
+        searchInput.addEventListener("input", function () {
+          const searchTerm = searchInput.value.toLowerCase();
+          const filteredData = data.filter(item =>
+            Object.values(item).some(value =>
+              value.toString().toLowerCase().includes(searchTerm)
+            )
+          );
+          renderSpecies(filteredData);
         });
-    })
-    .catch(error => {
-        console.error('Error fetching observations:', error);
-        document.getElementById('observations-container').innerHTML = '<p>Failed to load observations.</p>';
-    });
+      })
+      .catch(error => {
+        console.error("Error fetching observations:", error);
+        speciesContainer.innerHTML = `<p>Error loading species data: ${error.message}</p>`;
+      });
+  
+    function renderSpecies(speciesList) {
+      speciesContainer.innerHTML = "";
+  
+      if (speciesList.length === 0) {
+        speciesContainer.innerHTML = "<p>No species match your search criteria.</p>";
+        return;
+      }
+  
+      speciesList.forEach(species => {
+        const speciesCard = document.createElement("div");
+        speciesCard.className = "species-card";
+        speciesCard.innerHTML = `
+          <img src="${species.image_url}" alt="${species.common_name}" />
+          <div class="species-info">
+            <h3>${species.common_name || "Unknown Common Name"}</h3>
+            <p><em>${species.scientific_name}</em></p>
+            <p><strong>Kingdom:</strong> ${species.kingdom}</p>
+            <p><strong>Phylum:</strong> ${species.phylum}</p>
+            <p><strong>Class:</strong> ${species.class}</p>
+            <p><strong>Order:</strong> ${species.order}</p>
+            <p><strong>Family:</strong> ${species.family}</p>
+            <p><strong>Genus:</strong> ${species.genus}</p>
+            <a href="${species.url}" target="_blank">View Observation</a>
+          </div>
+        `;
+        speciesContainer.appendChild(speciesCard);
+      });
+    }
+  });
+  
