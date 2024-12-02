@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Display organism details
             organismDetails.innerHTML = `
                 <h2>${organism.common_name || 'Unknown Name'} (${organism.scientific_name})</h2>
-                <img src="${organism.image_url}" alt="${organism.common_name}">
+                <img src="${organism.image_url}" alt="${organism.common_name}" class="main-image">
                 <p><strong>Kingdom:</strong> ${organism.kingdom}</p>
                 <p><strong>Phylum:</strong> ${organism.phylum}</p>
                 <p><strong>Class:</strong> ${organism.class}</p>
@@ -60,7 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         observation.created_at_details?.date ||
                         'Unknown';
 
-                    // Display observation details
+                    // Include additional images from observation_photos and photos
+                    const additionalImages = observation.observation_photos
+                        .map(photo => `<img src="${photo.photo.url}" alt="Observation Image" class="additional-image">`)
+                        .join('');
+
                     organismDetails.innerHTML += `
                         <hr>
                         <h3>Observation Details</h3>
@@ -68,6 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p><strong>Date Observed:</strong> ${observedDate}</p>
                         <p><strong>Location:</strong> ${observation.place_guess || 'Unknown'}</p>
                         <p><a href="${observation.uri}" target="_blank">View Full Observation</a></p>
+                        <h4>Additional Images</h4>
+                        ${additionalImages || '<p>No additional images available.</p>'}
                     `;
                 })
                 .catch(error => {

@@ -53,3 +53,16 @@ footer {
   background-color: #4CAF50;
   color: white;
 }
+
+.main-image {
+  max-width: 300px;
+  border: 2px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.additional-image {
+  max-width: 150px;
+  margin: 5px;
+  border: 1px solid #ddd;
+}
+
