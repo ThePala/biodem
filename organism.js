@@ -10,38 +10,48 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Fetch observation and species data from iNaturalist API
-    const fetchObservation = fetch(`https://api.inaturalist.org/v1/observations?q=${encodeURIComponent(scientificName)}`);
-    const fetchSpecies = fetch(`https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(scientificName)}`);
+    // Load the organism's details from the JSON file
+    fetch('enriched_species.json')
+        .then(response => response.json())
+        .then(data => {
+            const organism = data.find(item => item.scientific_name === scientificName);
 
-    Promise.all([fetchObservation, fetchSpecies])
-        .then(async ([obsResponse, speciesResponse]) => {
-            const observationData = await obsResponse.json();
-            const speciesData = await speciesResponse.json();
-
-            if (!observationData.results.length || !speciesData.results.length) {
-                organismDetails.innerHTML = '<p>No data found for this organism.</p>';
+            if (!organism) {
+                organismDetails.innerHTML = '<p>Error: Organism not found in the database.</p>';
                 return;
             }
 
-            const observation = observationData.results[0];
-            const species = speciesData.results[0];
-
-            organismDetails.innerHTML = `
-                <h2>${species.preferred_common_name || 'Unknown Name'} (${species.name})</h2>
-                <img src="${observation.photos[0]?.url || 'placeholder.jpg'}" alt="${species.name}">
-                <p><strong>Kingdom:</strong> ${species.ancestry.split('/')[1] || 'Unknown'}</p>
-                <p><strong>Phylum:</strong> ${species.ancestry.split('/')[2] || 'Unknown'}</p>
-                <p><strong>Class:</strong> ${species.ancestry.split('/')[3] || 'Unknown'}</p>
-                <p><strong>Order:</strong> ${species.ancestry.split('/')[4] || 'Unknown'}</p>
-                <p><strong>Family:</strong> ${species.family || 'Unknown'}</p>
-                <p><strong>Genus:</strong> ${species.genus || 'Unknown'}</p>
-                <p><strong>Species:</strong> ${species.name}</p>
-                <p><a href="${observation.uri}" target="_blank">View Observation</a></p>
-            `;
+            // Fetch observation details from iNaturalist
+            fetch(`https://api.inaturalist.org/v1/observations/${organism.observation_id}`)
+            .then(response => response.json())
+            .then(observationData => {
+                const observation = observationData.results[0];
+        
+                if (!observation) {
+                    organismDetails.innerHTML += `
+                        <p>No observations available from iNaturalist.</p>
+                    `;
+                    return;
+                }
+        
+                // Display observation details
+                organismDetails.innerHTML += `
+                    <hr>
+                    <h3>Observation Details</h3>
+                    <p><strong>Observed By:</strong> ${observation.user?.name || 'Unknown'}</p>
+                    <p><strong>Date Observed:</strong> ${new Date(observation.observed_on).toLocaleDateString() || 'Unknown'}</p>
+                    <p><strong>Location:</strong> ${observation.place_guess || 'Unknown'}</p>
+                    <p><a href="${observation.uri}" target="_blank">View Full Observation</a></p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error fetching observation data:', error);
+                organismDetails.innerHTML += '<p>Error fetching observation data. Please try again later.</p>';
+            });
+        
         })
         .catch(error => {
             console.error('Error fetching organism data:', error);
-            organismDetails.innerHTML = '<p>Error fetching data. Please try again later.</p>';
+            organismDetails.innerHTML = '<p>Error loading organism data. Please try again later.</p>';
         });
 });
