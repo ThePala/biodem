@@ -55,12 +55,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
 
+                    // Safely handle observed date or fallback to created_at_details.date
+                    const observedDate = observation.observed_on_details?.date ||
+                        observation.created_at_details?.date ||
+                        'Unknown';
+
                     // Display observation details
                     organismDetails.innerHTML += `
                         <hr>
                         <h3>Observation Details</h3>
                         <p><strong>Observed By:</strong> ${observation.user?.name || 'Unknown'}</p>
-                        <p><strong>Date Observed:</strong> ${new Date(observation.observed_on).toLocaleDateString() || 'Unknown'}</p>
+                        <p><strong>Date Observed:</strong> ${observedDate}</p>
                         <p><strong>Location:</strong> ${observation.place_guess || 'Unknown'}</p>
                         <p><a href="${observation.uri}" target="_blank">View Full Observation</a></p>
                     `;
