@@ -8,10 +8,23 @@
 </head>
 <body>
     <header>
-        <h1>Registera</h1>
-        <input type="text" id="searchBar" placeholder="Search by name, genus, family, etc.">
-        <button id="loadAllButton" style="display: none;">Load All</button> <!-- Hidden initially -->
+        <h1>Christ University Biodiversity Register</h1>
+        <div>
+            <select id="filterDropdown">
+                <option value="all">All</option>
+                <option value="kingdom">Kingdom</option>
+                <option value="phylum">Phylum</option>
+                <option value="class">Class</option>
+                <option value="order">Order</option>
+                <option value="family">Family</option>
+                <option value="genus">Genus</option>
+                <option value="scientific_name">Scientific Name</option>
+            </select>
+            <input type="text" id="searchBar" placeholder="Search...">
+            <button id="loadAllButton" style="display: none;">Load All</button>
+        </div>
     </header>
+    
     <main id="organismGrid"></main>
     <footer></footer>
     <script src="script.js"></script>
