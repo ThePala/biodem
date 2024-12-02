@@ -62,8 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Include additional images from observation_photos and photos
                     const additionalImages = observation.observation_photos
-                        .map(photo => `<img src="${photo.photo.url}" alt="Observation Image" class="additional-image">`)
-                        .join('');
+                    .map(photo => {
+                        // Replace 'square' with 'original' in the URL
+                        const originalImageUrl = photo.photo.url.replace('square', 'original');
+                        return `<img src="${originalImageUrl}" alt="Observation Image" class="additional-image">`;
+                    })
+                    .join('');
 
                     organismDetails.innerHTML += `
                         <hr>
