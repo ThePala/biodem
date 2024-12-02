@@ -36,6 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <a href="${organism.url}" target="_blank">More Info</a>
             </div>
         `;
+    
+        // Redirect to organism page on click
+        card.addEventListener("click", () => {
+            window.location.href = `organism.html?id=${encodeURIComponent(organism.scientific_name)}`;
+        });
+    
         return card;
     }
 
