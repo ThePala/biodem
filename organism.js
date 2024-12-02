@@ -21,34 +21,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Fetch observation details from iNaturalist
-            fetch(`https://api.inaturalist.org/v1/observations/${organism.observation_id}`)
-            .then(response => response.json())
-            .then(observationData => {
-                const observation = observationData.results[0];
-        
-                if (!observation) {
+            // Extract observation ID from the URL field using regex
+            const observationIdMatch = organism.url.match(/observations\/(\d+)/);
+            const observationId = observationIdMatch ? observationIdMatch[1] : null;
+
+            // Display organism details
+            organismDetails.innerHTML = `
+                <h2>${organism.common_name || 'Unknown Name'} (${organism.scientific_name})</h2>
+                <img src="${organism.image_url}" alt="${organism.common_name}">
+                <p><strong>Kingdom:</strong> ${organism.kingdom}</p>
+                <p><strong>Phylum:</strong> ${organism.phylum}</p>
+                <p><strong>Class:</strong> ${organism.class}</p>
+                <p><strong>Order:</strong> ${organism.order}</p>
+                <p><strong>Family:</strong> ${organism.family}</p>
+                <p><strong>Genus:</strong> ${organism.genus}</p>
+            `;
+
+            if (!observationId) {
+                organismDetails.innerHTML += '<p>No observation ID could be extracted from the URL.</p>';
+                return;
+            }
+
+            // Fetch observation details from iNaturalist API
+            fetch(`https://api.inaturalist.org/v1/observations/${observationId}`)
+                .then(response => response.json())
+                .then(observationData => {
+                    const observation = observationData.results[0];
+
+                    if (!observation) {
+                        organismDetails.innerHTML += `
+                            <p>No observations available from iNaturalist.</p>
+                        `;
+                        return;
+                    }
+
+                    // Display observation details
                     organismDetails.innerHTML += `
-                        <p>No observations available from iNaturalist.</p>
+                        <hr>
+                        <h3>Observation Details</h3>
+                        <p><strong>Observed By:</strong> ${observation.user?.name || 'Unknown'}</p>
+                        <p><strong>Date Observed:</strong> ${new Date(observation.observed_on).toLocaleDateString() || 'Unknown'}</p>
+                        <p><strong>Location:</strong> ${observation.place_guess || 'Unknown'}</p>
+                        <p><a href="${observation.uri}" target="_blank">View Full Observation</a></p>
                     `;
-                    return;
-                }
-        
-                // Display observation details
-                organismDetails.innerHTML += `
-                    <hr>
-                    <h3>Observation Details</h3>
-                    <p><strong>Observed By:</strong> ${observation.user?.name || 'Unknown'}</p>
-                    <p><strong>Date Observed:</strong> ${new Date(observation.observed_on).toLocaleDateString() || 'Unknown'}</p>
-                    <p><strong>Location:</strong> ${observation.place_guess || 'Unknown'}</p>
-                    <p><a href="${observation.uri}" target="_blank">View Full Observation</a></p>
-                `;
-            })
-            .catch(error => {
-                console.error('Error fetching observation data:', error);
-                organismDetails.innerHTML += '<p>Error fetching observation data. Please try again later.</p>';
-            });
-        
+                })
+                .catch(error => {
+                    console.error('Error fetching observation data:', error);
+                    organismDetails.innerHTML += '<p>Error fetching observation data. Please try again later.</p>';
+                });
         })
         .catch(error => {
             console.error('Error fetching organism data:', error);
